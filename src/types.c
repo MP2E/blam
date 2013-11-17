@@ -20,56 +20,19 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __BLAM_TYPE__
-#define __BLAM_TYPE__
+#include <types.h>
 
-#include <fcntl.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
-#include <errno.h>
+d_inline int Swap16(int x)
+{
+    return (((word)(x & 0xff) << 8) | ((word)x >> 8));
+}
 
-extern int myargc;
-extern char **myargv;
-
-#define false 0
-#define true (!false)
-
-typedef int             dboolean;
-typedef unsigned char   byte;
-typedef unsigned short  word;
-typedef unsigned long   dword;
-
-#ifdef _WIN32
-
-#define DIR_SEPARATOR '\\'
-#define PATH_SEPARATOR ';'
-
-#else
-
-#define DIR_SEPARATOR '/'
-#define PATH_SEPARATOR ':'
-
-#endif
-
-#ifdef _MSC_VER
-    #include <direct.h>
-    #include <io.h>
-    #define strcasecmp  _stricmp
-    #define strncasecmp _strnicmp
-#endif
-
-#if defined(__GNUC__)
-  #define d_inline __inline__
-#elif defined(_MSC_VER)
-  #define d_inline __inline
-#else
-  #define d_inline
-#endif
-
-d_inline int Swap16(int x);
-d_inline unsigned int Swap32(unsigned int x);
-
-#endif
+d_inline unsigned int Swap32(unsigned int x)
+{
+    return(
+        ((x & 0xff) << 24)          |
+        (((x >> 8) & 0xff) << 16)   |
+        (((x >> 16) & 0xff) << 8)   |
+        ((x >> 24) & 0xff)
+        );
+}
