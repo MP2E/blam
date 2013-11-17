@@ -69,18 +69,12 @@ typedef unsigned long   dword;
   #define d_inline
 #endif
 
-d_inline int Swap16(int x)
+static d_inline int Swap16(int x)
 {
     return (((word)(x & 0xff) << 8) | ((word)x >> 8));
 }
 
-//**************************************************************
-//**************************************************************
-//	WGen_Swap32
-//**************************************************************
-//**************************************************************
-
-d_inline unsigned int Swap32(unsigned int x)
+static d_inline unsigned int Swap32(unsigned int x)
 {
     return(
         ((x & 0xff) << 24)          |
