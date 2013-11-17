@@ -9,6 +9,5 @@ add_executable(BLAM
 	src/main.c
 	src/parse.c
 	src/script.c
-	src/types.c
 )
 
