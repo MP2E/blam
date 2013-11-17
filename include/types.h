@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <errno.h>
 
 extern int myargc;
 extern char **myargv;
