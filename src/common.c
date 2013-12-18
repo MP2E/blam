@@ -22,6 +22,7 @@
 
 #include "types.h"
 #include "common.h"
+#include "parse.h"
 
 static unsigned long com_fileoffset = 0;
 static FILE *com_file = NULL;
@@ -92,16 +93,67 @@ void Com_Free(void **ptr)
 }
 
 //
+// Com_BaseDir
+//
+
+char* Com_BaseDir(void)
+{
+    static char current_dir_dummy[] = {"./"};
+    static char *base;
+
+    if(!base)    // cache multiple requests
+    {
+        size_t len = strlen(*myargv);
+        char *p = (base = malloc(len+1)) + len - 1;
+
+        strcpy(base, *myargv);
+
+        while(p > base && *p!='/' && *p!='\\') *p--=0;
+
+        if(*p=='/' || *p=='\\') *p--=0;
+
+        if(strlen(base)<2)
+        {
+            free(base);
+            base = malloc(1024);
+            if(!_getcwd(base,1024))
+                strcpy(base, current_dir_dummy);
+        }
+    }
+
+    return base;
+}
+
+//
+// va
+//
+
+static char *va(char *str, ...)
+{
+    va_list v;
+    static char vastr[1024];
+
+    va_start(v, str);
+    vsprintf(vastr, str,v);
+    va_end(v);
+
+    return vastr;
+}
+
+//
 // Com_ReadFile
 //
 
 int Com_ReadFile(const char* name, byte** buffer)
 {
-    FILE *fp;
+    FILE *fp = NULL;
+    char *fileName;
 
     errno = 0;
-    
-    if((fp = fopen(name, "r")))
+
+    fileName = va("%s/%s", ps_userdirectory, name);
+
+    if((fp = fopen(fileName, "r")))
     {
         size_t length;
 
@@ -119,8 +171,8 @@ int Com_ReadFile(const char* name, byte** buffer)
         
         fclose(fp);
    }
-    
-    Com_Error("Com_ReadFile: Couldn't find %s", name);
+
+    Com_Error("Com_ReadFile: Couldn't find %s", fileName);
 
     return -1;
 }
@@ -131,11 +183,14 @@ int Com_ReadFile(const char* name, byte** buffer)
 
 int Com_ReadBinaryFile(const char* name, byte** buffer)
 {
-    FILE *fp;
+    FILE *fp = NULL;
+    char *fileName;
 
     errno = 0;
-    
-    if((fp = fopen(name, "rb")))
+
+    fileName = va("%s/%s", ps_userdirectory, name);
+
+    if((fp = fopen(fileName, "rb")))
     {
         size_t length;
 
@@ -154,8 +209,8 @@ int Com_ReadBinaryFile(const char* name, byte** buffer)
         fclose(fp);
     }
 
-    Com_Error("Com_ReadBinaryFile: Couldn't find %s", name);
-    
+    Com_Error("Com_ReadBinaryFile: Couldn't find %s", fileName);
+
     return -1;
 }
 
@@ -166,18 +221,23 @@ int Com_ReadBinaryFile(const char* name, byte** buffer)
 dboolean Com_SetWriteFile(char const* name, ...)
 {
     char filename[1024];
+    char *otherFile;
     va_list v;
-    
+
     va_start(v, name);
     vsprintf(filename, name, v);
     va_end(v);
 
-    if(!(com_file = fopen(filename, "w")))
+    errno = 0;
+
+    otherFile = va("%s/%s", ps_userdirectory, filename);
+
+    if(!(com_file = fopen(otherFile, "w")))
     {
-        Com_Error("Com_SetWriteFile: Couldn't write %s", name);
+        Com_Error("Com_SetWriteFile: Couldn't write %s", otherFile);
         return 0;
     }
-   
+
     return 1;
 }
 
@@ -188,18 +248,23 @@ dboolean Com_SetWriteFile(char const* name, ...)
 dboolean Com_SetWriteBinaryFile(char const* name, ...)
 {
     char filename[1024];
+    char *otherFile;
     va_list v;
-    
+
     va_start(v, name);
     vsprintf(filename, name, v);
     va_end(v);
 
-    if(!(com_file = fopen(filename, "wb")))
+    errno = 0;
+
+    otherFile = va("%s/%s", ps_userdirectory, filename);
+
+    if(!(com_file = fopen(otherFile, "wb")))
     {
-        Com_Error("Com_SetWriteBinaryFile: Couldn't write %s", name);
+        Com_Error("Com_SetWriteBinaryFile: Couldn't write %s", otherFile);
         return 0;
     }
-   
+
     return 1;
 }
 
@@ -362,3 +427,77 @@ int Com_FileExists(const char *filename)
     return 0;
 }
 
+#define ASCII_SLASH		47
+#define ASCII_BACKSLASH 92
+
+//
+// Com_HasPath
+//
+
+dboolean Com_HasPath(char *name)
+{
+    unsigned int i;
+
+    for(i = 0; i < strlen(name); i++)
+    {
+        if(name[i] == ASCII_BACKSLASH || name[i] == ASCII_SLASH)
+            return true;
+    }
+
+    return false;
+}
+
+//
+// Com_StripExt
+//
+
+void Com_StripExt(char *name)
+{
+    char *search;
+
+    search = name + strlen(name) - 1;
+
+    while(*search != ASCII_BACKSLASH && *search != ASCII_SLASH
+        && search != name)
+    {
+        if(*search == '.')
+        {
+            *search = '\0';
+            return;
+        }
+
+        search--;
+    }
+}
+
+void Com_StripPath(char *name)
+{
+    char *search;
+    int len = 0;
+    int pos = 0;
+    int i = 0;
+
+    len = strlen(name) - 1;
+    pos = len + 1;
+
+    for(search = name + len;
+        *search != ASCII_BACKSLASH && *search != ASCII_SLASH; search--, pos--)
+    {
+        if(search == name)
+        {
+            return;
+        }
+    }
+
+    if(pos <= 0)
+    {
+        return;
+    }
+
+    for(i = 0; pos < len+1; pos++, i++)
+    {
+        name[i] = name[pos];
+    }
+
+    name[i] = '\0';
+}

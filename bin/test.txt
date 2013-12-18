@@ -1,4 +1,3 @@
-#setdir "../bin/"
 #include "common.txt"
 #include "utils.txt"
 

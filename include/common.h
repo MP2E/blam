@@ -27,6 +27,7 @@ void Com_Printf(char* s, ...);
 void Com_Error(char *fmt, ...);
 void* Com_Alloc(int size);
 void Com_Free(void **ptr);
+char* Com_BaseDir(void);
 int Com_ReadFile(const char* name, byte** buffer);
 int Com_ReadBinaryFile(const char* name, byte** buffer);
 dboolean Com_SetWriteFile(char const* name, ...);
@@ -42,5 +43,8 @@ void Com_Write8(byte value);
 void Com_Write16(short value);
 void Com_Write32(int value);
 void Com_FPrintf(char* s, ...);
+dboolean Com_HasPath(char *name);
+void Com_StripExt(char *name);
+void Com_StripPath(char *name);
 
 #endif
