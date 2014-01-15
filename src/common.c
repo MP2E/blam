@@ -151,7 +151,7 @@ int Com_ReadFile(const char* name, byte** buffer)
 
     errno = 0;
 
-    fileName = va("%s/%s", ps_userdirectory, name);
+    fileName = va("%s", name);
 
     if((fp = fopen(fileName, "r")))
     {
@@ -188,7 +188,7 @@ int Com_ReadBinaryFile(const char* name, byte** buffer)
 
     errno = 0;
 
-    fileName = va("%s/%s", ps_userdirectory, name);
+    fileName = va("%s", name);
 
     if((fp = fopen(fileName, "rb")))
     {
@@ -230,7 +230,7 @@ dboolean Com_SetWriteFile(char const* name, ...)
 
     errno = 0;
 
-    otherFile = va("%s/%s", ps_userdirectory, filename);
+    otherFile = va("%s", filename);
 
     if(!(com_file = fopen(otherFile, "w")))
     {
@@ -257,7 +257,7 @@ dboolean Com_SetWriteBinaryFile(char const* name, ...)
 
     errno = 0;
 
-    otherFile = va("%s/%s", ps_userdirectory, filename);
+    otherFile = va("%s", filename);
 
     if(!(com_file = fopen(otherFile, "wb")))
     {
