@@ -43,6 +43,9 @@ void M_NewMacro(int id)
     macroaction = macrodefs[id-1].data;
     activemacro->actions = 0;
     m_currentline = 10;
+
+    if(id > m_activemacros)
+        m_activemacros = id;
 }
 
 //
@@ -91,7 +94,6 @@ int M_GetLine(void)
 void M_FinishMacro(void)
 {
     m_currentline = 0;
-    m_activemacros++;
 }
 
 //
